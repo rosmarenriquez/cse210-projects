@@ -1,18 +1,22 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-// A code template for the category of things known as 
 public class Scripture
 {
-    // Variables
-    public List<Scripture> _scripture = new List<Scripture>();
+    // Private Variables
+    private List<Scripture> _scripture = new List<Scripture>();
     private string _fileName = "DataText.txt";
     private string _key;
     private string _text;
-    public int _index;
+    public int _index; // Index used to retrieve reference
     public string _scriptureText;
 
+    // Constructor
+    public Scripture() { }
 
-    // Methods
+    // Load scriptures from file
     public void LoadScriptures()
     {
         List<string> readText = File.ReadAllLines(_fileName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
@@ -21,15 +25,20 @@ public class Scripture
         {
             string[] entries = line.Split(";");
 
-            Scripture entry = new Scripture();
+            if (entries.Length >= 7)
+            {
+                Scripture entry = new Scripture
+                {
+                    _key = entries[0],
+                    _text = entries[6] // Assuming that the scripture text is in the 7th column (index 6)
+                };
 
-            entry._key = entries[0];
-            entry._text = entries[6];
-
-            _scripture.Add(entry);
+                _scripture.Add(entry);
+            }
         }
     }
 
+    // Display all loaded scriptures
     public void ScriptureDisplay()
     {
         foreach (Scripture item in _scripture)
@@ -37,11 +46,14 @@ public class Scripture
             item.ShowScripture();
         }
     }
+
+    // Display single scripture text
     public void ShowScripture()
     {
         Console.WriteLine($"\n{_text}");
     }
 
+    // Get a random index for scripture selection
     public int GetRandomIndex()
     {
         var random = new Random();
@@ -49,23 +61,10 @@ public class Scripture
         return _index;
     }
 
+    // Get a random scripture's text
     public string RandomScripture()
     {
         _index = GetRandomIndex();
-       return _scriptureText = _scripture[_index]._text;
+        return _scriptureText = _scripture[_index]._text;
     }
-    public void HideWords()
-    {
-
-    }
-    public void GetRenderedText()
-    {
-
-    }
-    public void IsCompletelyHidden()
-    {
-
-    }
-
-
 }

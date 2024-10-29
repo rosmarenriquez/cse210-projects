@@ -1,18 +1,41 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-// A code template for the category of things known as 
 public class Reference
 {
-    // Variables
-    public List<Reference> _reference = new List<Reference>();
+    // Private Variables
+    private List<Reference> _reference = new List<Reference>();
     private string _fileName = "DataText.txt";
     private string _key;
     private string _book;
     private int _chapter;
     private int _verseStart;
-    private int _verseEnd;
+    private int? _verseEnd; // Nullable to handle single verses
 
-    // Methods
+    // Constructors
+    public Reference() { }
+
+    // Constructor for single-verse references
+    public Reference(string book, int chapter, int verseStart)
+    {
+        _book = book;
+        _chapter = chapter;
+        _verseStart = verseStart;
+        _verseEnd = null;
+    }
+
+    // Constructor for multi-verse references
+    public Reference(string book, int chapter, int verseStart, int verseEnd)
+    {
+        _book = book;
+        _chapter = chapter;
+        _verseStart = verseStart;
+        _verseEnd = verseEnd;
+    }
+
+    // Method to load references from file
     public void LoadReference()
     {
         List<string> readText = File.ReadAllLines(_fileName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
@@ -21,64 +44,58 @@ public class Reference
         {
             string[] entries = line.Split(";");
 
-            Reference entry = new Reference();
+            if (entries.Length >= 5)
+            {
+                var book = entries[1];
+                var chapter = int.Parse(entries[2]);
+                var verseStart = int.Parse(entries[3]);
+                var verseEnd = int.Parse(entries[4]);
 
-            entry._key = entries[0];
-            entry._book = entries[1];
-            entry._chapter = int.Parse(entries[2]);
-            entry._verseStart = int.Parse(entries[3]);
-            entry._verseEnd = int.Parse(entries[4]);
+                Reference entry = verseEnd == 0 
+                    ? new Reference(book, chapter, verseStart)
+                    : new Reference(book, chapter, verseStart, verseEnd);
 
-            _reference.Add(entry);
+                entry._key = entries[0];
+                _reference.Add(entry);
+            }
         }
     }
 
+    // Method to display all references
     public void ReferenceDisplay()
     {
         foreach (Reference item in _reference)
         {
-            // var test = item._verseEnd.Equals(0);
-            // Console.WriteLine(test);
-            if (item._verseEnd.Equals(0))
+            if (item._verseEnd.HasValue)
             {
-                item.ReferenceOne();
+                item.DisplayMultiVerseReference();
             }
             else
             {
-                item.ReferenceTwo();
+                item.DisplaySingleVerseReference();
             }
         }
     }
+
+    // Retrieve formatted reference string
     public string GetReference(Scripture scripture)
     {
         var index = scripture._index;
-
         var refi = _reference[index];
-        string ref1;
-        if (refi._verseEnd.Equals(0))
-        {
-            return ref1 = ($"\n{refi._book} {refi._chapter}:{refi._verseStart}");
-            
-        }
-        else
-        {
-            return ref1 = $"\n{refi._book} {refi._chapter}:{refi._verseStart}-{refi._verseEnd}";
-        }
+        
+        return refi._verseEnd.HasValue 
+            ? $"\n{refi._book} {refi._chapter}:{refi._verseStart}-{refi._verseEnd}"
+            : $"\n{refi._book} {refi._chapter}:{refi._verseStart}";
     }
 
-
-    public void ReferenceOne()
+    // Display methods for single and multi-verse references
+    private void DisplaySingleVerseReference()
     {
         Console.WriteLine($"\n{_book} {_chapter}:{_verseStart}");
     }
-    public void ReferenceTwo()
+
+    private void DisplayMultiVerseReference()
     {
         Console.WriteLine($"\n{_book} {_chapter}:{_verseStart}-{_verseEnd}");
     }
 }
-
-// add()
-// delete()
-// display()
-// update()
-// search()

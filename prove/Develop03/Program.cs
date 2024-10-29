@@ -1,14 +1,10 @@
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-
 
 class Program
 {
     static void Main(string[] args)
     {
-        // This will clear the console
+        // Clear the console and set up classes
         Console.Clear();
         Reference reference = new Reference();
         reference.LoadReference();
@@ -16,88 +12,77 @@ class Program
         scripture.LoadScriptures();
         Word word = new Word();
 
-        Console.Write("\n**** Welcome to the Scripture Memorizer App ****\n");
+        Console.WriteLine("\n**** Welcome to the Scripture Memorizer App ****\n");
 
         int userChoice = 0;
-        // Console.WriteLine(userChoice);
 
         while (userChoice != 3)
         {
-            // Ask for user input (1,2,Q)
-            //Call UserChoice
+            // Display menu and get user choice
             userChoice = UserChoice();
 
             switch (userChoice)
             {
                 case 1:
                     reference.ReferenceDisplay();
-
                     break;
                 case 2:
-                    string script = scripture.RandomScripture();
-                    string ref1 = reference.GetReference(scripture);
+                    // Select random scripture and retrieve reference
+                    string scriptText = scripture.RandomScripture();
+                    string refText = reference.GetReference(scripture);
                     word.GetRenderedText(scripture);
-                    word.GetRenderedRef(scripture);
-                    // word.GetRenderedRef(reference);
-                    // Console.Write($"\n{ref1}\n{script}\n");
 
-                    while (word._hidden.Count < word._result.Length)
+                    // Loop until all words are hidden
+                    while (!word.AreAllWordsHidden())
                     {
-                        word.Show(ref1);
+                        word.Show(refText);
                         word.GetReadKey();
                     }
-                    word.Show(ref1);
+                    
+                    // Final display with all words hidden
+                    word.Show(refText);
+                    Console.WriteLine("\nAll words are hidden. Memorization complete!");
                     break;
+
                 case 3:
-                    Console.WriteLine("\n*** Thanks for playing! ***\n");
+                    Console.WriteLine("\n*** Thanks for using the Scripture Memorizer App! ***\n");
                     break;
+
                 default:
-                    Console.WriteLine($"\nSorry the option you entered is not valid.");
+                    Console.WriteLine("\nInvalid option. Please try again.");
                     break;
             }
         }
-
     }
 
     static int UserChoice()
-    // Method to display choices to user
     {
-        Reference reference = new Reference();
-
+        // Display user options
         string choices = $@"
 ===========================================
 Please select one of the following choices:
-1. Display all availble scriptures references
-2. Randomly select scripture to work on
+1. Display all available scripture references
+2. Randomly select scripture to memorize
 Q. Quit
 ===========================================
-What would you like to do?  ";
+What would you like to do? ";
 
         Console.Write(choices);
 
-        string userInput = Console.ReadLine();
-        userInput.ToLower();
-        int userChoice = 0;
-        // This block catches any non integer values that are entered
+        // Get user input and validate
+        string userInput = Console.ReadLine().ToLower();
+        if (userInput == "q")
+        {
+            return 3;
+        }
+
         try
         {
-            if (userInput == "q")
-            {
-                userInput = "3";
-            }
-            userChoice = int.Parse(userInput);
+            return int.Parse(userInput);
         }
         catch (FormatException)
         {
-            userChoice = 0;
+            return 0;
         }
-        catch (Exception exception)
-        {
-            Console.WriteLine(
-                $"Unexpected error:  {exception.Message}");
-        }
-        return userChoice;
     }
-
-
 }
